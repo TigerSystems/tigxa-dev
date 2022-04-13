@@ -18,23 +18,38 @@ if (env != null) {
 
 System.out.println("::set-output name=release::" + getVersion())
 
+String user = findProperty("github.username")
+if(user == null) user = System.getenv("gituser")
+String pwd = findProperty("github.token")
+if(pwd == null) pwd = System.getenv("gitpwd")
+
 repositories {
     mavenCentral()
+    mavenLocal()
+
+    maven {
+        name = "Github"
+        url = uri("https://maven.pkg.github.com/TigerSystems/tigxa")
+        credentials {
+            username = user
+            password = pwd
+        }
+    }
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation('de.MarkusTieger:tigxa-api:[1.0.0,)')
+    implementation('de.MarkusTieger:tigxa:[1.0.0,)')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 test {
     useJUnitPlatform()
 }
 
-String user = findProperty("github.username")
-if(user == null) user = System.getenv("gituser")
-String pwd = findProperty("github.token")
-if(pwd == null) pwd = System.getenv("gitpwd")
 
 publishing {
     repositories {
