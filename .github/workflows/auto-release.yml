@@ -1,0 +1,109 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+# Easter-Egg found ... (by MarkusTieger)
+
+name: Auto Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    outputs:
+      release: ${{ steps.build.outputs.release }}
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    
+    #- name: Generate build number
+    #  id: buildnumber
+    #  uses: einaregilsson/build-number@v3 
+    #  with:
+    #    token: ${{ secrets.github_token }}
+        
+        
+        
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        
+        
+        
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+      
+      
+    - name: Build with Gradle
+      #run: ./gradlew build
+      #working-directory: .
+      id: build
+      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+      with:
+        arguments: build --refresh-dependencies
+      env:
+        build_number: ${{ github.run_number }}
+        gituser: ${{ github.actor }}
+        gitpwd: ${{ secrets.GITHUB_TOKEN }}
+        
+    #- name: Upload Artifact (Linux)
+    #  uses: actions/upload-artifact@v2.2.4
+    #  with:
+    #    name: tigxa-1.0.0-linux
+    #    path: build/libs    
+    #  continue-on-error: true
+    
+    
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ steps.build.outputs.release }}-${{ steps.build.outputs.build_number }}
+        release_name: ${{ steps.build.outputs.release }}-${{ steps.build.outputs.build_number }}
+        #body: |
+        #  Changes in this Release
+        #  - First Change
+        #  - Second Change
+        draft: false
+        prerelease: false
+        
+        
+        
+    - name: Upload Build Jar
+      id: upload-build-jar
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: build/libs/tigxa-dev-${{ steps.build.outputs.release }}.jar
+        asset_name: tigxa-dev-${{ steps.build.outputs.release }}.jar
+        asset_content_type: application/java-archive
+      continue-on-error: true
+      
+    - name: Publish to GitHub Packages
+      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+      with:
+        arguments: publish
+      env:
+        build_number: ${{ github.run_number }}
+        gituser: ${{ github.actor }}
+        gitpwd: ${{ secrets.GITHUB_TOKEN }}
