@@ -1,6 +1,6 @@
 package de.MarkusTieger.dev;
 
-import de.MarkusTieger.Tigxa.Browser;
+import de.MarkusTieger.Tigxa.*;
 import de.MarkusTieger.Tigxa.api.IAPI;
 import de.MarkusTieger.Tigxa.extension.IExtension;
 
@@ -26,6 +26,8 @@ public class Dev {
             return null;
 
         });
+        
+        Bootstrap.main(new String[0]);
 
     }
 
