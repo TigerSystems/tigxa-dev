@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group 'de.MarkusTieger'
+archivesBaseName = this.getProject().name
+version '1.0.0'
+
+String env = System.getenv("build_number");
+
+if (env != null) {
+    while (env.length() < 6) {
+        env = "0" + env
+    }
+    System.out.println("::set-output name=build_number::" + env)
+}
+
+System.out.println("::set-output name=release::" + getVersion())
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+String user = findProperty("github.username")
+if(user == null) user = System.getenv("gituser")
+String pwd = findProperty("github.token")
+if(pwd == null) pwd = System.getenv("gitpwd")
+
+publishing {
+    repositories {
+        maven {
+            name = "Github"
+            url = uri("https://maven.pkg.github.com/TigerSystems/tigxa-dev")
+            credentials {
+                username = user
+                password = pwd
+            }
+        }
+    }
+    publications {
+        register("jar", MavenPublication) {
+            from(components["java"])
+            pom {
+                url.set("https://github.com/TigerSystems/tigxa-dev.git")
+                version = this.getVersion() + (env == null ? "" : ("-" + env))
+            }
+        }
+    }
+}
