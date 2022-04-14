@@ -25,11 +25,20 @@ if(pwd == null) pwd = System.getenv("gitpwd")
 
 repositories {
     mavenCentral()
-    mavenLocal()
+    // mavenLocal()
 
     maven {
-        name = "Github"
+        name = "Github-Main"
         url = uri("https://maven.pkg.github.com/TigerSystems/tigxa-main")
+        credentials {
+            username = user
+            password = pwd
+        }
+    }
+
+    maven {
+        name = "Github-API"
+        url = uri("https://maven.pkg.github.com/TigerSystems/tigxa-api")
         credentials {
             username = user
             password = pwd
