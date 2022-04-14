@@ -29,7 +29,7 @@ repositories {
 
     maven {
         name = "Github"
-        url = uri("https://maven.pkg.github.com/TigerSystems/tigxa")
+        url = uri("https://maven.pkg.github.com/TigerSystems/tigxa-main")
         credentials {
             username = user
             password = pwd
