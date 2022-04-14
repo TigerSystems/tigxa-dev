@@ -6,6 +6,7 @@ import de.MarkusTieger.Tigxa.extension.IExtension;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Dev {
 
@@ -28,8 +29,11 @@ public class Dev {
         });
 
 
+        clazz = Class.forName("de.MarkusTieger.Tigxa.Bootstrap");
+        Method main = clazz.getDeclaredMethod("main", String[].class);
+        main.invoke(null, new Object[] {new String[0]});
 
-        Bootstrap.main(new String[0]);
+        // Bootstrap.main(new String[0]);
 
     }
 
